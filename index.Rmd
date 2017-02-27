@@ -1,6 +1,6 @@
 ---
 title: "ODS Final Assignment"
-author: "Ismo Vihtola"
+author: "Ismo Vihtola, ismo.vihtola@hotmail.com"
 date: "27 helmikuuta 2017"
 output: html_document
 ---
@@ -8,23 +8,28 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+<br>
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### TASKS TO DO
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Brief description of the "research question" you are exploring, possibly including your hypothesis (max 2 points)
 
-```{r cars}
-summary(cars)
-```
+A link to your data wrangling script. See the general instructions. (max 5/10 points)
 
-## Including Plots
+Description of your data and its variables. Where is the data from, what does it relate to, what do the variables represent, what has been done to the data before analysis? (max 2 points)
 
-You can also embed plots, for example:
+Visually clear and interesting explorations of the variables of interest in the data, from the point of view of your research question. Include interpretations of the distributions and relationships of the variables. Use captions to draw the reader’s focus on the interesting parts of your tables and graphics. (max 8 points)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+Brief description of the method you are using in your own words (max 3 points)
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Presentation of the results of your analysis including visualizations and summaries and a thorough interpretation of the results including a validation analysis of the method. (max 16 points)
+
+Conclusions and discussion (max 2 points)
+
+An ‘abstract’ at the beginning of the page with a summary of your analysis (max 2 points)
+
+### TASKS DONE
+
+OK : Your full name, date and email address at the beginning of the page. Use the yaml header of the RMarkdown
+document to set these.
