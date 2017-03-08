@@ -1,35 +1,179 @@
+
 ---
-title: "ODS Final Assignment"
-author: "Ismo Vihtola, ismo.vihtola@hotmail.com"
-date: "27 helmikuuta 2017"
-output: html_document
+title: "Open Data Source - Final Assignment"
+author: "Ismo Vihtola ismo.vihtola@hotmail.com"
+date: "08.03.2017"
+output: 
+  html_document:
+    code_folding: hide
+    fig_width: 6
+    fig_height: 4
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
 ```
 <br>
 
+### Abstract
+This is the final assignment for the Open Data Science course that was hold in the beginning of year 2017. Course environment was build by University of Helsinki and the course was done via web platform (MOOC).
 
-### TASKS TO DO
+In this research I have tried to study if some key figure(s) can be found to predict, which ice-hockey players are better than others when it concern penalty killing. Basic information that was use in this research can be be found on www.hockeyabstract.com,
 
-Brief description of the "research question" you are exploring, possibly including your hypothesis (max 2 points)
+[This document](https://vihtois.github.io/IODS-final/)
+<br>
+[Data Wrangling](https://vihtois.github.io/IODS-final/Data_Wrangling.R)
+<br>
 
-A link to your data wrangling script. See the general instructions. (max 5/10 points)
+## Research Question
+In this research question I try to find if there are some key figures that can predict if the ice-hockey player is when he is playing as a penalty killer. Basic information for this research can be found from  http://www.hockeyabstract.com/testimonials. 
+<br>
 
-Description of your data and its variables. Where is the data from, what does it relate to, what do the variables represent, what has been done to the data before analysis? (max 2 points)
+### Data Wrangling
+Information for research questions was collected from http://www.hockeyabstract.com. It is very comprehensive web page concerning NHL stats.
+<br>
+Description for how dataset(s) that was used in this project can be found from Data Wrangling file that can be found from [here](https://vihtois.github.io/IODS-final/Data_Wrangling.R)
+<br>
 
-Visually clear and interesting explorations of the variables of interest in the data, from the point of view of your research question. Include interpretations of the distributions and relationships of the variables. Use captions to draw the reader’s focus on the interesting parts of your tables and graphics. (max 8 points)
+### Explaining the Data
+Data was loaded from http://www.hockeyabstract.com/. It is web-page where you can find a lot information after NHL season is over. For example per player there are over 340 variables. Data that was used in this research was selected by me. Totally 8 variables were choosen. This was because of the huge amount of variables that the basic information includes per player.
 
-Brief description of the method you are using in your own words (max 3 points)
+First dataset DB4 will be read into R and its dimensions and structures will be examined
+<br>
+```{r kohta1b}
+DB3 <- read.table("C:/DATA/Opiskelu/IODS-Final/DB3.csv",sep=",",header=TRUE)
+DB4 <- read.table("C:/DATA/Opiskelu/IODS-Final/DB4.csv",sep=",",header=TRUE)
+DB4$X <- NULL
+dim(DB4)
+str(DB4)
+```
+<br>
+The dataset has 322 observations and 7 variables. The variables types are all integer or numeric. Below is table where variables have been clarified. 
+<br>
 
-Presentation of the results of your analysis including visualizations and summaries and a thorough interpretation of the results including a validation analysis of the method. (max 16 points)
+Variable  | Information
+----------|--------------------------------------------------------
+GP        | games played during season
+Age       | players age
+SHTOIP60  | short-handed time on ice per game per 60 minutes
+SHBlkP60  | blocks made when playing short-handed per 60 minutes
+SHTakeP60 | takeaways made when playing short-handed per 60 minutes
+SHPP60    | points made when playing short-handed per 60 minutes
+SHGAP60   | goals allowed when playing short-handed per 60 minutes
+<br>
 
-Conclusions and discussion (max 2 points)
+Next variables will be looked by graphics. Lets look density plots for them.
+<br>
+```{r kohta2a, fig.width=8, fig.height=5}
+par(mfrow=c(2,4))
+plot(density(DB3$GP), main="Games played", xlab="GP", ylab="")
+plot(density(DB3$Age), main="Age", xlab="Age", ylab="")
+plot(density(DB3$SHTOIP60), main="Time On Ice  per game, short-handed", xlab="seconds", ylab="")
+plot(density(DB3$SHBlkP60), main="Blocks P60, short-handed", xlab="Blocks", ylab="")
+plot(density(DB3$SHTakeP60), main="Takeaways P60, short-handed", xlab="Takeaways", ylab="")
+plot(density(DB3$SHPP60), main="Points P60, short-handed", xlab="Points", ylab="")
+plot(density(DB3$SHGAP60), main="Goals allowed P60, short-handed", xlab="Goals allowed", ylab="")
+```
+<br>
 
-An ‘abstract’ at the beginning of the page with a summary of your analysis (max 2 points)
+We can see that there are some variables that seems to be almost normally distributed, namely age, Time On Ice, Blocks and Goals allowed. Points have a peak at 0 points, Games played has peak at 80 and takeaways has a peak at 2.
+<br><br>
 
-### TASKS DONE
+Then lets compare relationships between variables with pictures and numbers
+<br>
+```{r kohta2b}
+library(GGally)
+ggpairs(DB4)
+```
+<br>
 
-OK : Your full name, date and email address at the beginning of the page. Use the yaml header of the RMarkdown
-document to set these.
+This seems intresting, because correlation between variables is quite weak. Strongest correlation is between Blocks and Time On Ice and correlation between them is only 0.354. In general it can be said that there is no strong correlation between variables. 
+<br><br>
+
+### Linear Discriminant Analysis
+To find out research question "Which key figures predicts good penalty kill player?", Linear Discriminant Analysis (LDA) will be used. LDA is supervised learning method. LDA method seeks to minimize the differences within groups and maximize the differences between groups.
+<br>
+
+When using LDA, categorial variable is needed. Therefore SHGAP60 variable will be cut to four different sections (low, med_low, med_high, high). SHGP60 variable tell how many goals team have allowed when player has been playing in penalty kliller role. Therefore the lower SHGP60 is, the better results player has achieved.
+
+There are 322 observations and they will be divided to two different groups. First is called train (80% of observations) and other one is called test (20% of observations). Train dataset will be used to create the model and test dataset is going to be use to validate how good model is.
+
+Next the analysis will be made. It is started by scaling dataset.
+
+```{r kohta3a}
+DB4_scaled <- scale(DB4)
+summary(DB4_scaled)
+```
+<br>
+When scaling is made, every variables mean is 0 and standard deviation is 1. When scaling has been made it is easier and more meaningful to handle. 
+
+Now categorial variable will be created. This is done so that quantiles will be taken from variable SHGAP60 and observations will be classified to classes based on quantiles. Target is to have equal amount of observations to each class. First table below shows quantiles for variable SHGAP60 and the second table below show how observations have been classified to classes. Classification seems to be succesful.
+
+```{r kohta3b}
+DB4_scaled <- as.data.frame(DB4_scaled)
+breakpoints <- quantile(DB4_scaled$SHGAP60)
+labels <- c("low", "mod_low", "mod_high", "high")
+SHGA_cat <- cut(DB4_scaled$SHGAP60, breakpoints, include.lowest = TRUE, label = labels)
+breakpoints
+table(SHGA_cat)
+```
+<br>
+Next train and test data will be generated. Train dataset is going to have 80% of all observations and test dataset is going to have 20% of observations.
+
+```{r kohta3c}
+DB4_scaled <- dplyr::select(DB4_scaled, -SHGAP60)
+DB4_scaled <- data.frame(DB4_scaled, SHGA_cat)
+n <- nrow(DB4_scaled)
+perc8020 <- sample(n, size = n * 0.8)
+train <- DB4_scaled[perc8020,]
+test <- DB4_scaled[-perc8020,]
+dim(train)
+dim(test)
+```
+<br>
+So 80% of 322 observation is 257 observation and 20% is 65 observation.
+<br>
+Finally model will be fitted
+
+```{r kohta3d}
+library(MASS)
+lda.fit <- lda(SHGA_cat ~ ., data = train)
+lda.fit
+```
+<br>
+```{r kohta3e}
+# Plot
+# the function for lda biplot arrows
+lda.arrows <- function(x, myscale = 2, arrow_heads = 0.1, color = "black", tex = 1, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+```
+
+```{r kohta3f, fig.width=8, fig.height=5}
+# target classes as numeric
+classes <- as.numeric(train$SHGA_cat)
+# plot the lda results
+plot(lda.fit, dimen = 2, col=classes, pch=classes, main="LDA")
+lda.arrows(lda.fit, myscale = 2)
+```
+<br>
+Picture is small (fig.width, fig.height does not help) and it makes analysing it quite complicated. But if there would be some key figure that was used in this research it should be separated from others in some way that could be read from picture. In this research classified value **low** should be in it's own group. Now it seems to be a big mess. At least for me this is a little surprise.
+
+Next we test if model can predict. Expectation is that model won't predict good. 
+
+```{r kohta4a}
+correct_classes <- test$SHGA_cat
+test <- dplyr::select(test, -SHGA_cat)
+lda.pred <- predict(lda.fit, newdata = test)
+table(correct = correct_classes, predicted = lda.pred$class) 
+```
+<br>
+Yep, not even close. There are even observations that was predicted to be high but they were low.
+
+##Conclusions and Discussion
+We can conclude that we could not find key figure(s) that could predict if player is good penalty killer or not in this research. Maybe pre chosen variables were not so good as was waited. For me this was suprise, because I was waiting at least some kind of signs. 
